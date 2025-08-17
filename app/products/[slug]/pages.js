@@ -1,90 +1,85 @@
-'use client';
-
-import { useCart } from '@/context/CartContext';
-import { useEffect, useState } from 'react';
 import React from 'react';
+import Link from 'next/link';
 
-// The main page component - NOW A CLIENT COMPONENT
-export default function ProductDetailPage({ params }) {
-  const [product, setProduct] = useState(null);
-  const [error, setError] = useState(null);
-  const { addToCart } = useCart(); // <-- Access the addToCart function
+const ProductCard = ({ product }) => {
+  // --- THIS IS THE FIX ---
+  // We are now using the correct, case-sensitive field names from your Strapi API.
+  const { name, Description, Price, Images, slug } = product.attributes;
 
-  useEffect(() => {
-    async function fetchProductData(slug) {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL;
-        const res = await fetch(`${apiUrl}/api/products?filters[slug][$eq]=${slug}&populate=*`);
-
-        if (!res.ok) throw new Error('Failed to fetch product');
-        
-        const jsonResponse = await res.json();
-        if (jsonResponse.data && jsonResponse.data.length > 0) {
-          setProduct(jsonResponse.data[0]);
-        } else {
-          throw new Error('Product not found');
-        }
-      } catch (err) {
-        setError(err.message);
-      }
-    }
-    fetchProductData(params.slug);
-  }, [params.slug]);
-
-  if (error) {
-    return (
-      <div className="bg-black min-h-screen text-white flex items-center justify-center">
-        <h1 className="text-3xl text-red-500">{error}</h1>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="bg-black min-h-screen text-white flex items-center justify-center">
-        <h1 className="text-3xl">Loading...</h1>
-      </div>
-    );
-  }
-
-  const { name, description, price, images } = product.attributes;
-  const imageUrl = images?.data?.[0]?.attributes?.url
-    ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${images.data[0].attributes.url}`
+  const imageUrl = Images?.data?.[0]?.attributes?.url
+    ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${Images.data[0].attributes.url}`
     : 'https://placehold.co/600x400';
 
-  const handleAddToCart = () => {
-    addToCart(product);
-    alert(`${name} has been added to your bag!`); // Simple confirmation for now
-  };
-
   return (
-    <div className="bg-black min-h-screen text-white">
-      <main className="max-w-4xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-          <div>
-            <img
-              src={imageUrl}
-              alt={name}
-              className="w-full h-auto object-cover rounded-lg shadow-lg"
-            />
-          </div>
-          <div className="flex flex-col h-full">
-            <h1 className="text-4xl font-bold tracking-tight text-pink-400">{name}</h1>
-            <p className="mt-4 text-3xl text-gray-200">${price}</p>
-            <div className="mt-6">
-              <h3 className="sr-only">Description</h3>
-              <p className="text-base text-gray-400">{description}</p>
-            </div>
-            <div className="mt-auto pt-8">
-              <button
-                onClick={handleAddToCart} // <-- This now calls our function
-                className="w-full bg-pink-500 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-pink-500 transition-colors"
-              >
-                Add to bag
-              </button>
-            </div>
-          </div>
+    <Link href={`/product/${slug}`} className="group block">
+      <div className="relative bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
+        <div className="w-full h-64 bg-gray-700 overflow-hidden">
+          <img
+            src={imageUrl}
+            alt={name}
+            className="w-full h-full object-cover object-center group-hover:opacity-80 transition-opacity duration-300"
+          />
         </div>
+        <div className="p-4 text-white flex-grow flex flex-col">
+          <h3 className="text-lg font-semibold text-pink-400">
+            {name}
+          </h3>
+          <p className="mt-1 text-sm text-gray-400 flex-grow">{Description}</p>
+          <p className="mt-2 text-base font-medium text-gray-200">${Price}</p>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+// Main HomePage component that fetches and displays products
+export default async function HomePage() {
+  let products = [];
+  let error = null;
+
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/products?populate=*`, {
+      next: { revalidate: 60 }
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch products: ${res.status} ${res.statusText}`);
+    }
+
+    const jsonResponse = await res.json();
+    products = jsonResponse.data || [];
+  } catch (e) {
+    console.error(e);
+    error = e.message;
+  }
+
+ return (
+    <div className="bg-black min-h-screen text-white">
+      <header className="py-6 px-4 sm:px-6 lg:px-8 border-b border-gray-800">
+        <h1 className="text-3xl font-bold tracking-tight text-pink-500 text-center">
+          MyDream Beauty
+        </h1>
+        <p className="text-center text-gray-400 mt-2">Inspired by Excellence</p>
+      </header>
+      <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        {error ? (
+          <div className="text-center text-red-500">
+            <h2 className="text-2xl font-semibold">Failed to Load Products</h2>
+            <p>{error}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6">
+            {products.length > 0 ? (
+              products
+                .filter(product => product && product.attributes)
+                .map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))
+            ) : (
+              <p className="col-span-full text-center text-gray-500">No products available at the moment.</p>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
