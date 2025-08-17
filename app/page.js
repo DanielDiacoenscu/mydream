@@ -1,12 +1,3 @@
-// import React from 'react';
-
-// export default function HomePage() {
-//   return (
-//     <div className="bg-black min-h-screen text-white flex items-center justify-center">
-//       <h1 className="text-5xl text-green-500">DIAGNOSTIC TEST: SYSTEM ONLINE</h1>
-//     </div>
-//   );
-// }
 import React from 'react';
 import Link from 'next/link';
 
