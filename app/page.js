@@ -8,8 +8,8 @@ const ProductCard = ({ product }) => {
   // Construct the full image URL from the relative path provided by Strapi
   // Use optional chaining to prevent errors if images or data are missing
   const imageUrl = images?.data?.[0]?.attributes?.url 
-    ? `http://164.92.160.227:1337${images.data[0].attributes.url}` 
-    : 'https://placehold.co/600x400'; // Fallback placeholder
+  ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${images.data[0].attributes.url}` 
+  : 'https://placehold.co/600x400';
 
   return (
     <div className="group relative bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
