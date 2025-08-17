@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link'; // <-- CRITICAL FIX #1: Import the Link component
+import Link from 'next/link';
 import { useCart } from '../../context/CartContext';
 
+// This can be a shared component, but for now, we'll keep it here.
 const Header = () => {
     const { itemCount } = useCart();
     return (
@@ -11,7 +12,6 @@ const Header = () => {
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center border-b border-gray-800">
           <div className="flex-1"></div>
           <div className="text-center">
-            {/* CRITICAL FIX #2: Replace <a> with <Link> */}
             <Link href="/">
               <h1 className="text-3xl font-bold tracking-tight text-pink-500">
                 MyDream Beauty
@@ -21,7 +21,7 @@ const Header = () => {
           </div>
           <div className="flex-1 flex justify-end">
             <div className="relative">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 {itemCount > 0 && (
@@ -45,18 +45,16 @@ export default function ProductPage({ params }) {
 
     useEffect(() => {
         if (!slug) return;
-
         const fetchProduct = async () => {
             try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/products?filters[slug][$eq]=${slug}&populate=*`);
-                if (!res.ok) {
-                    throw new Error('Failed to fetch product data');
-                }
+                if (!res.ok) throw new Error('Product data not found');
                 const jsonResponse = await res.json();
-                if (jsonResponse.data && jsonResponse.data.length > 0) {
+                // CRITICAL FIX: Validate the response structure
+                if (jsonResponse.data && jsonResponse.data.length > 0 && jsonResponse.data[0].attributes) {
                     setProduct(jsonResponse.data[0]);
                 } else {
-                    throw new Error('Product not found');
+                    throw new Error('Product not found or data is malformed');
                 }
             } catch (err) {
                 setError(err.message);
@@ -64,12 +62,13 @@ export default function ProductPage({ params }) {
                 setLoading(false);
             }
         };
-
         fetchProduct();
     }, [slug]);
 
     if (loading) return <div className="bg-black min-h-screen text-white text-center p-10">Loading...</div>;
     if (error) return <div className="bg-black min-h-screen text-white text-center p-10">Error: {error}</div>;
+    
+    // This check is now redundant due to the fetch logic, but it's good practice.
     if (!product) return <div className="bg-black min-h-screen text-white text-center p-10">Product not found.</div>;
 
     const { name, Description, Price, Images } = product.attributes;
@@ -83,11 +82,11 @@ export default function ProductPage({ params }) {
             <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="bg-gray-800 rounded-lg overflow-hidden">
-                        <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+                        <img src={imageUrl} alt={name || 'Product Image'} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex flex-col justify-center">
-                        <h1 className="text-3xl font-bold text-pink-400">{name}</h1>
-                        <p className="text-2xl text-gray-200 mt-2">${Price}</p>
+                        <h1 className="text-3xl font-bold text-pink-400">{name || 'Unnamed Product'}</h1>
+                        <p className="text-2xl text-gray-200 mt-2">${Price || '0.00'}</p>
                         <p className="text-gray-400 mt-4">{Description}</p>
                         <button
                             onClick={() => addToCart(product)}
