@@ -2,32 +2,35 @@
 
 import React, { createContext, useState, useContext } from 'react';
 
-const CartContext = createContext();
+// Create the context with a default undefined value
+const CartContext = createContext(undefined);
 
+// Create the Provider component
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cart, setCart] = useState([]);
 
   const addToCart = (product) => {
-    setCartItems((prevItems) => {
-      const itemExists = prevItems.find((item) => item.id === product.id);
-      if (itemExists) {
-        return prevItems.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prevItems, { ...product, quantity: 1 }];
+    // Prevent adding duplicates, or handle quantity later
+    setCart((prevCart) => {
+      // Simple version: just add the product
+      return [...prevCart, product];
     });
   };
 
-  const cart = {
-    items: cartItems,
-    addToCart,
-    itemCount: cartItems.reduce((total, item) => total + item.quantity, 0),
-  };
+  const itemCount = cart.length;
 
-  return <CartContext.Provider value={cart}>{children}</CartContext.Provider>;
+  // The value that will be available to all consuming components
+  const value = { cart, addToCart, itemCount };
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
+// Create the custom hook for easy consumption
 export const useCart = () => {
-  return useContext(CartContext);
+  const context = useContext(CartContext);
+  // This check is crucial. If a component outside the provider calls this, it will throw a clear error.
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
 };
