@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link'; // <-- CRITICAL FIX #1: Import the Link component
 import { useCart } from '../../context/CartContext';
 
 const Header = () => {
@@ -10,9 +11,12 @@ const Header = () => {
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center border-b border-gray-800">
           <div className="flex-1"></div>
           <div className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-pink-500">
-              <a href="/">MyDream Beauty</a>
-            </h1>
+            {/* CRITICAL FIX #2: Replace <a> with <Link> */}
+            <Link href="/">
+              <h1 className="text-3xl font-bold tracking-tight text-pink-500">
+                MyDream Beauty
+              </h1>
+            </Link>
             <p className="text-sm text-gray-400 mt-1">Inspired by Excellence</p>
           </div>
           <div className="flex-1 flex justify-end">
