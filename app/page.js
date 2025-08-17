@@ -25,7 +25,7 @@ const CartIcon = () => {
 const Header = () => {
   return (
     <header className="sticky top-0 z-10 bg-black bg-opacity-80 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center border-b border-gray-800">
+      <div className="max-w-7xl mx-auto py-4 px-4 sm-px-6 lg:px-8 flex justify-between items-center border-b border-gray-800">
         <div className="flex-1"></div>
         <div className="text-center">
           <Link href="/">
@@ -43,15 +43,18 @@ const Header = () => {
   );
 };
 
-// --- HARDENED Product Card Component ---
+// --- FINAL ADAPTED Product Card Component ---
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
-  if (!product || !product.attributes) {
+  // The product object itself is now the source of truth.
+  // We no longer need to check for .attributes.
+  if (!product) {
     return null; 
   }
 
-  const { name, Description, Price, Images, slug } = product.attributes;
+  // CRITICAL FIX: Destructure directly from the product object.
+  const { name, Description, Price, Images, slug } = product;
 
   const imageUrl = Images?.data?.[0]?.attributes?.url
     ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${Images.data[0].attributes.url}`
@@ -96,13 +99,10 @@ export default function HomePage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        // We now know the API endpoint is correct.
         const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/products?populate=*`);
         if (!res.ok) throw new Error(`API Error: ${res.status}`);
         const jsonResponse = await res.json();
-        
-        // --- DIAGNOSTIC LINE ---
-        console.log("RAW API RESPONSE:", jsonResponse); 
-        
         setProducts(jsonResponse.data || []);
       } catch (e) {
         setError(e.message);
