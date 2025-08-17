@@ -1,36 +1,31 @@
 import React from 'react';
+import Link from 'next/link';
 
-// Component for displaying a single product card
 const ProductCard = ({ product }) => {
-  // Destructure attributes for easier access
-  const { name, description, price, images } = product.attributes;
-  
-  // Construct the full image URL from the relative path provided by Strapi
-  // Use optional chaining to prevent errors if images or data are missing
-  const imageUrl = images?.data?.[0]?.attributes?.url 
-  ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${images.data[0].attributes.url}` 
-  : 'https://placehold.co/600x400';
+  const { name, description, price, images, slug } = product.attributes;
+  const imageUrl = images?.data?.[0]?.attributes?.url
+    ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${images.data[0].attributes.url}`
+    : 'https://placehold.co/600x400';
 
   return (
-    <div className="group relative bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300">
-      <div className="w-full h-64 bg-gray-700 overflow-hidden">
-        <img
-          src={imageUrl}
-          alt={name}
-          className="w-full h-full object-cover object-center group-hover:opacity-80 transition-opacity duration-300"
-        />
-      </div>
-      <div className="p-4 text-white">
-        <h3 className="text-lg font-semibold text-pink-400">
-          <a href="#">
-            <span aria-hidden="true" className="absolute inset-0" />
+    <Link href={`/product/${slug}`} className="group block">
+      <div className="relative bg-gray-800 border border-gray-700 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
+        <div className="w-full h-64 bg-gray-700 overflow-hidden">
+          <img
+            src={imageUrl}
+            alt={name}
+            className="w-full h-full object-cover object-center group-hover:opacity-80 transition-opacity duration-300"
+          />
+        </div>
+        <div className="p-4 text-white flex-grow flex flex-col">
+          <h3 className="text-lg font-semibold text-pink-400">
             {name}
-          </a>
-        </h3>
-        <p className="mt-1 text-sm text-gray-400">{description}</p>
-        <p className="mt-2 text-base font-medium text-gray-200">${price}</p>
+          </h3>
+          <p className="mt-1 text-sm text-gray-400 flex-grow">{description}</p>
+          <p className="mt-2 text-base font-medium text-gray-200">${price}</p>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
