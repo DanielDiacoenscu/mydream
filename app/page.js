@@ -2,7 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 
 const ProductCard = ({ product }) => {
-  const { name, Description, Price, Images, slug } = product.attributes;
+  // --- THIS IS THE FINAL FIX ---
+  // The .attributes object is removed to match your API's data structure.
+  const { name, Description, Price, Images, slug } = product;
 
   const imageUrl = Images?.data?.[0]?.attributes?.url
     ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${Images.data[0].attributes.url}`
@@ -65,10 +67,10 @@ export default async function HomePage() {
             <p>{error}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-y-10 sm-grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6">
+          <div className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6">
             {products.length > 0 ? (
               products
-                .filter(product => product && product.attributes)
+                // The filter is no longer needed as we are not checking for .attributes
                 .map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))
