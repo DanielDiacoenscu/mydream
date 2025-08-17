@@ -52,7 +52,7 @@ export default async function HomePage() {
     error = e.message;
   }
 
-  return (
+ return (
     <div className="bg-black min-h-screen text-white">
       <header className="py-6 px-4 sm:px-6 lg:px-8 border-b border-gray-800">
         <h1 className="text-3xl font-bold tracking-tight text-pink-500 text-center">
@@ -69,9 +69,11 @@ export default async function HomePage() {
         ) : (
           <div className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6">
             {products.length > 0 ? (
-              products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))
+              products
+                .filter(product => product && product.attributes) // <-- THIS IS THE FIX
+                .map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))
             ) : (
               <p className="col-span-full text-center text-gray-500">No products available at the moment.</p>
             )}
