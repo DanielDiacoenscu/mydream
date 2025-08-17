@@ -9,7 +9,7 @@ const CartIcon = () => {
   const { itemCount } = useCart();
   return (
     <div className="relative">
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
       </svg>
       {itemCount > 0 && (
@@ -47,8 +47,6 @@ const Header = () => {
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
 
-  // CRITICAL FIX: Validate the product structure before destructuring.
-  // If the product or its attributes are missing, render nothing.
   if (!product || !product.attributes) {
     return null; 
   }
@@ -101,6 +99,10 @@ export default function HomePage() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/products?populate=*`);
         if (!res.ok) throw new Error(`API Error: ${res.status}`);
         const jsonResponse = await res.json();
+        
+        // --- DIAGNOSTIC LINE ---
+        console.log("RAW API RESPONSE:", jsonResponse); 
+        
         setProducts(jsonResponse.data || []);
       } catch (e) {
         setError(e.message);
