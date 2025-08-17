@@ -37,9 +37,9 @@ export default async function HomePage() {
   try {
     // Fetch products from the live Strapi API
     // The 'populate=*' query parameter ensures that all related fields, like images, are included in the response
-    const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/products?populate=*`, { 
-      cache: 'no-store' // Use no-store to ensure fresh data on every request
-    });
+   const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_API_URL}/api/products?populate=*`, { 
+    next: { revalidate: 60 } // Revalidate every 60 seconds
+      });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch products: ${res.status} ${res.statusText}`);
