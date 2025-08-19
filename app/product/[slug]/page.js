@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCart } from '../../context/CartContext';
 
 const Header = () => {
-    const { itemCount } = useCart();
+    const { itemCount, openCart } = useCart(); // <-- Get openCart
     return (
       <header className="sticky top-0 z-10 bg-black bg-opacity-80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center border-b border-gray-800">
@@ -19,7 +19,7 @@ const Header = () => {
             <p className="text-sm text-gray-400 mt-1">Inspired by Excellence</p>
           </div>
           <div className="flex-1 flex justify-end">
-            <div className="relative">
+            <div className="relative cursor-pointer" onClick={openCart}> {/* <-- Add onClick */}
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
@@ -50,7 +50,6 @@ export default function ProductPage({ params }) {
                 if (!res.ok) throw new Error('Product data not found');
                 const jsonResponse = await res.json();
                 if (jsonResponse.data && jsonResponse.data.length > 0) {
-                    // The data is already flattened, so we can use it directly.
                     setProduct(jsonResponse.data[0]);
                 } else {
                     throw new Error('Product not found');
@@ -68,7 +67,6 @@ export default function ProductPage({ params }) {
     if (error) return <div className="bg-black min-h-screen text-white text-center p-10">Error: {error}</div>;
     if (!product) return <div className="bg-black min-h-screen text-white text-center p-10">Product not found.</div>;
 
-    // CRITICAL FIX: Destructure directly from the product object.
     const { name, Description, Price, Images } = product;
     const imageUrl = Images?.data?.[0]?.attributes?.url
         ? `${process.env.NEXT_PUBLIC_STRAPI_API_URL}${Images.data[0].attributes.url}`
